@@ -10,11 +10,43 @@
 	   default-lazy-init="true">
 	
 	<!-- 使用annotation 自动注册bean, 并保证@Required、@Autowired的属性被注入 -->
-	<context:annotation-config/>
-
 	<context:component-scan base-package="com.jt" >
 		<context:exclude-filter type="annotation" expression="org.springframework.stereotype.Controller" />
 	</context:component-scan>
+
+
+	<bean class="org.snaker.engine.spring.SpringSnakerEngine">
+		<property name="processService" ref="processService"/>
+		<property name="orderService" ref="orderService"/>
+		<property name="taskService" ref="taskService"/>
+		<property name="queryService" ref="queryService"/>
+		<property name="managerService" ref="managerService"/>
+	</bean>
+
+	<bean id="dbAccess" class="org.snaker.engine.access.mybatis.MybatisAccess">
+		<property name="sqlSessionFactory" ref="coreSqlSessionFactory"/>
+	</bean>
+
+	<bean id="processService" class="org.snaker.engine.core.ProcessService">
+		<property name="access" ref="dbAccess"/>
+		<property name="cacheManager" ref="cacheManager"/>
+	</bean>
+	<bean id="orderService" class="org.snaker.engine.core.OrderService">
+		<property name="access" ref="dbAccess"/>
+	</bean>
+	<bean id="taskService" class="org.snaker.engine.core.TaskService">
+		<property name="access" ref="dbAccess"/>
+	</bean>
+	<bean id="managerService" class="org.snaker.engine.core.ManagerService">
+		<property name="access" ref="dbAccess"/>
+	</bean>
+	<bean id="queryService" class="org.snaker.engine.core.QueryService">
+		<property name="access" ref="dbAccess"/>
+	</bean>
+
+	<bean id="cacheManager" class="org.snaker.engine.cache.memory.MemoryCacheManager"/>
+
+
 
 	<!-- 资金库 -->
 	<!-- MyBatis配置 -->
@@ -26,8 +58,7 @@
 		<!-- 显式指定Mapper文件位置 -->
 		<property name="mapperLocations" >
 			<array>
-				<value>classpath:/mybatis/*</value>
-				<value>classpath:/mapper/*</value>
+				<value>classpath:/mybatis/</value>
 			</array>
 		</property>
 	</bean>
