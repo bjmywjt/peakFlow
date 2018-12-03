@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	   xmlns:context="http://www.springframework.org/schema/context"
-	   xmlns:jee="http://www.springframework.org/schema/jee" xmlns:aop="http://www.springframework.org/schema/aop"
-	   xmlns:tx="http://www.springframework.org/schema/c"
+	   xmlns:context="http://www.springframework.org/schema/context" xmlns:aop="http://www.springframework.org/schema/aop"
+	   xmlns:tx="http://www.springframework.org/schema/tx"
 	   xsi:schemaLocation="
 		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
 		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd
-		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.0.xsd"
+		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.0.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd
+		"
 	   default-lazy-init="true">
 	
 	<!-- 使用annotation 自动注册bean, 并保证@Required、@Autowired的属性被注入 -->
@@ -20,24 +21,18 @@
 	<!-- MyBatis配置 -->
 	<bean id="coreSqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
 		<property name="dataSource" ref="coreDataSource" />
-		<property name="configLocation" value="classpath:/mybatis-config.xml"></property>
+		<property name="configLocation" value="classpath:/mybatis-config.xml"/>
 		<!-- 自动扫描domain目录, 省掉Configuration.xml里的手工配置 -->
-		<property name="typeAliasesPackage" value="com.jt.domain" />
+		<property name="typeAliasesPackage" value="org.snaker.engine.entity" />
 		<!-- 显式指定Mapper文件位置 -->
 		<property name="mapperLocations" >
 			<array>
-				<value>classpath:/mybatis/*</value>
-				<value>classpath:/mapper/*</value>
+				<value>classpath:/mapper/*.xml</value>
 			</array>
 		</property>
 	</bean>
-	<!-- 扫描basePackage下所有以@MyBatisRepository标识的 接口 -->
-	<bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
-		<property name="sqlSessionFactoryBeanName" value="coreSqlSessionFactory" />
-		<property name="basePackage" value="" />
-	</bean>
 
-	<tx:advice id="txAdvice" transaction-manager="transactionManager">
+	<tx:advice id="txAdvice" transaction-manager="coreTransactionManager">
 		<tx:attributes>
 			<tx:method name="start*" propagation="REQUIRED"/>
 			<tx:method name="execute*" propagation="REQUIRED"/>
@@ -81,9 +76,6 @@
 
 	<!-- 定义aspectj -->
 	<aop:aspectj-autoproxy proxy-target-class="true" />
-
-	<!-- JSR303 Validator定义 -->
-	<bean id="validator" class="org.springframework.validation.beanvalidation.LocalValidatorFactoryBean" />
 
 
 	<!-- local development环境 -->

@@ -2,10 +2,12 @@ package com.jt;
 
 import static org.junit.Assert.assertTrue;
 
+import com.jt.service.SnakerEngineFacets;
 import com.jt.utils.Profiles;
 import org.junit.Test;
 import org.snaker.engine.SnakerEngine;
 import org.snaker.engine.access.QueryFilter;
+import org.snaker.engine.entity.HistoryTask;
 import org.snaker.engine.entity.Process;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.DirtiesContext;
@@ -20,10 +22,12 @@ import java.util.List;
  */
 
 @DirtiesContext
-@ContextConfiguration(locations = { "/applicationContext.xml" })
+@ContextConfiguration(locations = { "/applicationContext.xml", "/applicationContext-snaker.xml" })
 @ActiveProfiles(value = Profiles.DEVELOPMENT)
 public class AppTest extends AbstractTransactionalJUnit4SpringContextTests{
 
+    @Autowired
+    private SnakerEngineFacets snakerEngineFacets;
     @Autowired
     private SnakerEngine engine;
 
@@ -39,6 +43,15 @@ public class AppTest extends AbstractTransactionalJUnit4SpringContextTests{
 
     @Test
     public void testFirst(){
-        List<Process> list = engine.process().getProcesss(new QueryFilter());
+        List<String> names = snakerEngineFacets.getAllProcessNames();
+        System.out.println(names.toString());
+    }
+
+    @Test
+    public void testSencond(){
+        List<HistoryTask> tasks = engine.query().getHistoryTasks(new QueryFilter());
+        tasks.stream().forEach(historyTask -> {
+            System.out.println(historyTask.toString());
+        });
     }
 }
